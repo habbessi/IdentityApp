@@ -1,0 +1,88 @@
+﻿@page
+
+
+@using IdentityApp.Authorization;
+@using IdentityApp.Models;
+@using Microsoft.AspNetCore.Authorization;
+
+@inject IAuthorizationService AuthorizationService
+
+@model IdentityApp.Pages.Invoices.DetailsModel
+
+@{
+    ViewData["Title"] = "Details";
+}
+
+
+
+<div>
+   
+   
+    <dl class="row">
+        <h1>Invoice Details</h1>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Invoice.InvoiceAmount)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Invoice.InvoiceAmount)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Invoice.InvoiceMonth)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Invoice.InvoiceMonth)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Invoice.InvoiceOwner)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Invoice.InvoiceOwner)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Invoice.Status)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Invoice.Status)
+        </dd>
+    </dl>
+</div>
+
+@{
+    var isAuthorized = await AuthorizationService.AuthorizeAsync(
+                 User, Model.Invoice, InvoiceOperations.Reject);
+
+    if (isAuthorized.Succeeded)
+    {
+        @if (Model.Invoice.Status != InvoiceStatus.Approved)
+        {
+            <form style="display:inline;" method="post">
+                <input type="hidden" name="id" value="@Model.Invoice.InvoiceId" />
+                <input type="hidden" name="status" value="@InvoiceStatus.Approved" />
+                <button type="submit" class="btn btn-xs btn-success">Approve</button>
+
+            </form>
+        }
+
+        @if (Model.Invoice.Status != InvoiceStatus.Rejected)
+        {
+            <form style="display:inline;" method="post">
+                <input type="hidden" name="id" value="@Model.Invoice.InvoiceId" />
+                <input type="hidden" name="status" value="@InvoiceStatus.Rejected" />
+                <button type="submit" class="btn btn-xs btn-danger">Reject</button>
+
+            </form>
+        }
+
+    }
+}
+
+
+<div>
+    @if (isAuthorized.Succeeded == false)
+    {
+        <a class="btn btn-primary mt-3" asp-page="./Edit" asp-route-id="@Model.Invoice.InvoiceId">Edit</a>
+
+
+    }
+    <a class="btn btn-info mt-3" asp-page="./Index">View List</a>
+</div>
